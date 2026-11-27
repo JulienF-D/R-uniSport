@@ -1,0 +1,61 @@
+
+-- ==========================================
+-- REUNISPORT : BASE RESERVATION
+-- ==========================================
+
+CREATE DATABASE IF NOT EXISTS reunisport_reservation
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE reunisport_reservation;
+
+-- ==========================================
+-- TABLE RESERVATIONS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS reservations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Identifiant de l'utilisateur dans AUTH
+    user_id INT NOT NULL,
+
+    -- Identifiant de l'equipement dans CATALOGUE
+    equipement_id INT NOT NULL,
+
+    reservation_date DATE NOT NULL,
+
+    heure_debut TIME NOT NULL,
+    heure_fin TIME NOT NULL,
+
+    statut ENUM(
+        'confirmee',
+        'annulee'
+    ) NOT NULL DEFAULT 'confirmee',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    cancelled_at TIMESTAMP NULL,
+
+    -- L'heure de fin doit être après l'heure de début
+    CONSTRAINT chk_reservation_hours
+        CHECK (heure_debut < heure_fin),
+
+    -- Index pour rechercher les conflits de réservation
+    INDEX idx_reservation_equipement_date (
+        equipement_id,
+        reservation_date,
+        statut,
+        heure_debut,
+        heure_fin
+    ),
+
+    -- Index pour retrouver les réservations d'un utilisateur
+    INDEX idx_reservation_user_date (
+        user_id,
+        reservation_date,
+        statut
+    )
+) ENGINE=InnoDB;
