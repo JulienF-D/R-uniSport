@@ -1,0 +1,87 @@
+
+-- ==========================================
+-- REUNISPORT : BASE CATALOGUE
+-- ==========================================
+
+CREATE DATABASE IF NOT EXISTS reunisport_catalogue
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE reunisport_catalogue;
+
+-- ==========================================
+-- TABLE EQUIPEMENTS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS equipements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    nom VARCHAR(150) NOT NULL,
+
+    type ENUM(
+        'salle',
+        'terrain',
+        'minibus',
+        'sonorisation',
+        'chronometre',
+        'autre'
+    ) NOT NULL DEFAULT 'autre',
+
+    lieu VARCHAR(200) NOT NULL,
+
+    capacite INT NULL,
+
+    description TEXT NULL,
+
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_equipement_type (type),
+    INDEX idx_equipement_actif (actif)
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- EQUIPEMENTS DE DEMONSTRATION
+-- ==========================================
+
+INSERT INTO equipements
+(nom, type, lieu, capacite, description)
+VALUES
+(
+    'Terrain de football',
+    'terrain',
+    'Saint-Denis',
+    22,
+    'Terrain de football pour les entrainements et les matchs.'
+),
+(
+    'Salle multisport',
+    'salle',
+    'Saint-Denis',
+    30,
+    'Salle adaptee aux activites sportives.'
+),
+(
+    'Minibus sportif',
+    'minibus',
+    'Saint-Pierre',
+    9,
+    'Minibus pour les deplacements des clubs.'
+),
+(
+    'Kit de sonorisation',
+    'sonorisation',
+    'Saint-Denis',
+    NULL,
+    'Materiel de sonorisation pour les evenements sportifs.'
+),
+(
+    'Chronometre electronique',
+    'chronometre',
+    'Saint-Pierre',
+    NULL,
+    'Chronometre pour les competitions sportives.'
+);
