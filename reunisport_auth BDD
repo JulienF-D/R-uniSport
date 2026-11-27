@@ -1,0 +1,92 @@
+
+-- ==========================================
+-- REUNISPORT : BASE AUTH
+-- ==========================================
+
+CREATE DATABASE IF NOT EXISTS reunisport_auth
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE reunisport_auth;
+
+-- ==========================================
+-- TABLE CLUBS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS clubs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(150) NOT NULL,
+    ville VARCHAR(100) NOT NULL,
+    code_club VARCHAR(30) NOT NULL UNIQUE,
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- TABLE UTILISATEURS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+
+    role ENUM('admin', 'club') NOT NULL DEFAULT 'club',
+
+    club_id INT NULL,
+
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    must_change_password BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_users_club
+        FOREIGN KEY (club_id)
+        REFERENCES clubs(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_user_club_role CHECK (
+        (role = 'admin' AND club_id IS NULL)
+        OR
+        (role = 'club' AND club_id IS NOT NULL)
+    )
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- TABLE HISTORIQUE DES CONNEXIONS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS login_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    username_attempted VARCHAR(100) NOT NULL,
+    user_id INT NULL,
+
+    success BOOLEAN NOT NULL DEFAULT FALSE,
+    ip_address VARCHAR(45) NULL,
+
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_login_username (username_attempted),
+    INDEX idx_login_date (attempted_at),
+
+    CONSTRAINT fk_login_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ==========================================
+-- DONNEES DE DEMONSTRATION
+-- ==========================================
+
+INSERT IGNORE INTO clubs (nom, ville, code_club)
+VALUES
+('Club Sportif Nord', 'Saint-Denis', 'CLUB-NORD'),
+('Club Sportif Sud', 'Saint-Pierre', 'CLUB-SUD');
